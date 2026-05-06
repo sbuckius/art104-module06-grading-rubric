@@ -26,6 +26,15 @@ body { font-family: Georgia, 'Times New Roman', serif; background: #FDF0F5; min-
 .btn-export:disabled { opacity: 0.6; cursor: not-allowed; }
 .sec { background: #fff; border: 1px solid #F4C0D1; border-radius: 12px; padding: 14px 18px; margin-bottom: 12px; }
 .sec.is-sim { background: #FBEAF0; border: 2px solid #D4537E; }
+.sec.is-render { background: #FFF0F6; border: 2px solid #F4C0D1; }
+.sec.is-render .sec-title { color: #993556; }
+.sec.is-render .row { border-top-color: #FDE8F1; }
+.sec.is-render .sec-score { background: #FFE4F0; color: #72243E; }
+.sec.is-pres { background: #F5E0E8; border: 2px solid #C97A97; }
+.sec.is-pres .sec-title { color: #4B1528; }
+.sec.is-pres .sublabel { color: #72243E; border-top-color: #E8B4C8; }
+.sec.is-pres .row { border-top-color: #EED0DC; }
+.sec.is-pres .sec-score { background: #EDD0DC; color: #4B1528; }
 .sec-hdr { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #F4C0D1; padding-bottom: 10px; margin-bottom: 10px; }
 .sec-title { font-size: 14px; font-weight: 700; color: #72243E; font-family: sans-serif; }
 .is-sim .sec-title { color: #4B1528; }
@@ -169,14 +178,36 @@ var DATA = [
     {l:"P2: 3 sketches per member, each with title, sentence, and name",pts:6},
     {l:"P3: 3+ views in full color with labeled callouts",pts:8},
     {l:"P3: Note identifying which P2 sketches it developed from and why",pts:3},
-    {l:"Final: Highest-quality render / draw / code / film",pts:8},
     {l:"Final: All elements labeled (title, medium, author)",pts:4},
     {l:"No AI-generated images, found photos, or unaltered screenshots in final",pts:5}
+  ]},
+  {t:"Final speculative artwork render", render:true, items:[
+    {l:"Highest-quality render / draw / code / film submitted",pts:10},
+    {l:"Full color throughout",pts:4},
+    {l:"Fully diagrammed with labeled components",pts:4},
+    {l:"Single static image alone does not meet requirement — must include simulation element",pts:2}
+  ]},
+  {t:"Presentation", pres:true, subs:[
+    {sl:"Preparation & structure", items:[
+      {l:"Presentation submitted on each due date",pts:5},
+      {l:"Template used and format followed",pts:3},
+      {l:"Clear structure: intro, body paragraphs, speculative artwork, conclusion",pts:5}
+    ]},
+    {sl:"Content", items:[
+      {l:"Thesis and speculative artwork clearly communicated",pts:6},
+      {l:"All 3 body paragraph themes addressed",pts:6},
+      {l:"Artworks and articles referenced in presentation",pts:4}
+    ]},
+    {sl:"Delivery", items:[
+      {l:"Presenter speaks clearly and engages with the material",pts:5},
+      {l:"Visual aids support (not just repeat) spoken content",pts:4},
+      {l:"Stays within allotted time",pts:2}
+    ]}
   ]},
   {t:"Simulation element", sim:true, subs:[
     {sl:"Type & execution", items:[
       {l:"Simulation element present (video, animation, code, sound, storyboard, or physical demo)",pts:5},
-      {l:"Meets minimum duration / scope (30–90 sec video/audio, 3+ panels storyboard, etc.)",pts:4},
+      {l:"Meets minimum duration / scope (3 sec minimum video/audio, 3+ panels storyboard, etc.)",pts:1},
       {l:"Clearly shows how the artwork works or behaves over time",pts:4}
     ]},
     {sl:"Documentation", items:[
@@ -236,13 +267,17 @@ DATA.forEach(function(sec){
   var secMax=allItems.reduce(function(a,i){return a+i.pts;},0);
 
   var secDiv=document.createElement('div');
-  secDiv.className='sec'+(sec.sim?' is-sim':'');
+  var cls='sec';
+  if(sec.sim) cls+=' is-sim';
+  else if(sec.render) cls+=' is-render';
+  else if(sec.pres) cls+=' is-pres';
+  secDiv.className=cls;
 
   var hdr=document.createElement('div'); hdr.className='sec-hdr';
   var titleSpan=document.createElement('span'); titleSpan.className='sec-title';
   if(sec.sim){
     titleSpan.textContent=sec.t+' ';
-    var badge=document.createElement('span'); badge.className='sim-badge'; badge.textContent='15 pts';
+    var badge=document.createElement('span'); badge.className='sim-badge'; badge.textContent='12 pts';
     titleSpan.appendChild(badge);
   } else { titleSpan.textContent=sec.t; }
 
@@ -321,9 +356,10 @@ document.getElementById('btn-export').addEventListener('click',function(){
       for(var k=0;k<allItems.length;k++){ var v=parseFloat(allRows[ri+k].ni.value)||0; secEarned+=Math.min(v,allItems[k].item.pts); }
 
       np(26);
-      rr(ml,y,cw,20,sec.sim?[75,21,40]:[114,36,62],null);
+      var hdrColor=sec.sim?[75,21,40]:sec.render?[153,53,86]:sec.pres?[120,45,75]:[114,36,62];
+      rr(ml,y,cw,20,hdrColor,null);
       doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(251,234,240);
-      doc.text(sec.sim?sec.t+' [15 pts]':sec.t, ml+8, y+14);
+      doc.text(sec.sim?sec.t+' [12 pts]':sec.t, ml+8, y+14);
       doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(237,147,177);
       doc.text(secEarned.toFixed(1)+' / '+secMax+' pts', ml+cw-6, y+14, {align:'right'});
       y+=22;
